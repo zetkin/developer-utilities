@@ -1,0 +1,19 @@
+{
+  "name": "tsv2yml",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csv-parse": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "node-yaml": "^3.0.3",
+    "object-path": "^0.11.3",
+    "request": "^2.79.0",
+    "tsv": "^0.2.0"
+  }
+}
