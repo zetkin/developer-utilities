@@ -20,4 +20,5 @@ The CSV file can also be a URL retrievable over HTTP/HTTPS:
 $ npm start https://example.com/path/to/file.csv /path/to/www.zetk.in/locale
 ```
 
-This makes it possible to retrieve directly from a public Google spreadsheet.
+This makes it possible to retrieve directly from a public Google spreadsheet,
+e.g. http://docs.google.com/spreadsheets/d/<sheet-id>/export?format=csv.
