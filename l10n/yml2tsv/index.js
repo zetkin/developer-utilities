@@ -80,13 +80,15 @@ loadMessages(process.argv[2], (err, messages) => {
     // First row is header
     rows.push([ 'File path', 'YAML path' ].concat(langs));
 
-    Object.keys(messages).forEach(msg => {
-        let message = messages[msg];
-        let translations = langs.map(lang => message.translations[lang] || '');
-        let row = [ message.filePath, message.yamlPath ].concat(translations);
+    Object.keys(messages)
+        .sort()
+        .forEach(msg => {
+            let message = messages[msg];
+            let translations = langs.map(lang => message.translations[lang] || '');
+            let row = [ message.filePath, message.yamlPath ].concat(translations);
 
-        rows.push(row);
-    });
+            rows.push(row);
+        });
 
     stringify(rows, { delimiter: '\t' }, (err, csv) => {
         console.log(csv);
