@@ -90,7 +90,7 @@ loadMessages(process.argv[2], (err, messages) => {
             rows.push(row);
         });
 
-    stringify(rows, { delimiter: '\t' }, (err, csv) => {
+    stringify(rows, { delimiter: '\t', quoted: true, }, (err, csv) => {
         console.log(csv);
     });
 });
