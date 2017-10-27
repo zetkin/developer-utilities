@@ -75,7 +75,7 @@ loadData(process.argv[2], rows => {
 
         if (!directories.hasOwnProperty(filePath)) {
             directories[filePath] = {
-                path: filePath.replace('.', '/'),
+                path: filePath.split('.').join('/'),
                 translations: {},
             };
         }
