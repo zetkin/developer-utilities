@@ -1,4 +1,4 @@
-# `yml2tsv` localization message converter utility
+# `zetkin-poeditor-upload` localization message converter utility
 
 This utility script converts the tree of YAML files used in the Zetkin front-end
 apps to lists of Terms for the Poeditor.com translation service.

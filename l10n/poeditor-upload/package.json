@@ -1,7 +1,8 @@
 {
-  "name": "yml2tsv",
+  "name": "zetkin-poeditor-upload",
   "version": "1.1.0",
-  "description": "Read data from filesystem and publish it to the poeditor.com website",
+  "description": "Read YAML data from filesystem and publish it to the poeditor.com website",
+  "repository": "https://github.com/zetkin/developer-utilities",
   "main": "index.js",
   "scripts": {
     "start": "node .",
