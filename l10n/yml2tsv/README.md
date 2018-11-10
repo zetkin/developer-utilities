@@ -24,8 +24,14 @@ POEDITOR_PROJECT_ID=12345 APP_LOCALE_PATH="~/opensource/www.zetk.in/locale" ./ad
 
 ## Update language translations
 
+Update all translations:
+
+```
+POEDITOR_PROJECT_ID=12345 ./update-all-languages.sh
+```
+
 Update Danish strings:
 
 ```
-POEDITOR_PROJECT_ID=12345 TARGET_LANGUAGE=da update-language.sh
+POEDITOR_PROJECT_ID=12345 TARGET_LANGUAGE=da ./update-language.sh
 ```
