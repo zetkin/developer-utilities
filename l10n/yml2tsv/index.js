@@ -1,5 +1,10 @@
 'use strict';
 
+// ENV variables are read from the ../.env file
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '../.env') });
+// process.env.POEDITOR_API_KEY
+
 const flatten = require('flat').flatten;
 const yaml = require('node-yaml');
 const recurse = require('recursive-readdir');
@@ -90,6 +95,7 @@ loadMessages(process.argv[2], (err, messages) => {
             rows.push(row);
         });
 
+    // TODO: Build the API message from rows.
     stringify(rows, { delimiter: '\t', quoted: true, }, (err, csv) => {
         console.log(csv);
     });
