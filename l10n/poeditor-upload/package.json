@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^6.1.0",
     "flat": "^4.1.0",
     "node-yaml": "^3.0.3",
     "recursive-readdir": "^2.1.0"

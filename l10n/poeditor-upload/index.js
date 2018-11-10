@@ -1,10 +1,5 @@
 'use strict';
 
-// ENV variables are read from the ../.env file
-const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '../.env') });
-const util = require('util');
-
 const flatten = require('flat').flatten;
 const yaml = require('node-yaml');
 const recurse = require('recursive-readdir');
