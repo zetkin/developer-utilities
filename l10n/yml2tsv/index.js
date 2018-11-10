@@ -43,7 +43,8 @@ let loadMessages = (path, cb) => {
 
                     let filePath = pathElems
                         .slice(0, pathElems.length -1)
-                        .join('.');
+                        .join('.')
+                        .substring(1); // drop initial dot
 
                     let fileMessages = flatten(data);
                     let flatData = flatten(data);
@@ -52,9 +53,10 @@ let loadMessages = (path, cb) => {
                         let fullPath = filePath + '.' + msg;
 
                         if (!messages.hasOwnProperty(fullPath)) {
+                            let yamlPath = msg;
                             messages[fullPath] = {
-                                filePath: filePath,
-                                yamlPath: msg,
+                                filePath,
+                                yamlPath,
                                 translations: {},
                             };
                         }
