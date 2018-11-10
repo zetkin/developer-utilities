@@ -7,7 +7,7 @@ apps to lists of Terms for the Poeditor.com translation service.
 
 Pre-requisites:
 
-- Install `jq`
+- Install [`jq`](https://stedolan.github.io/jq/download/)
 - Install `curl`
 - Prepare your `../.env` file with API key
 - `npm install`
