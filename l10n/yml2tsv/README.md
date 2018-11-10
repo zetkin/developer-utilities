@@ -10,3 +10,9 @@ $ npm start /path/to/www.zetk.in/locale
 ```
 
 TSV output is printed to stdout.
+
+## Configuration
+
+Copy `env-example` as `.env`.
+
+Set the API key.
