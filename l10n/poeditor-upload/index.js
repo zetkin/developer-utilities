@@ -3,8 +3,6 @@
 const flatten = require('flat').flatten;
 const yaml = require('node-yaml');
 const recurse = require('recursive-readdir');
-const stringify = require('csv-stringify');
-
 
 let loadMessages = (path, cb) => {
     let messages = {};
@@ -19,11 +17,19 @@ let loadMessages = (path, cb) => {
         }
 
         for (let i = 0; i < files.length; i++) {
-            yaml.read(files[i], null, (err, data) => {
+            yaml.read(files[i], {
+                encoding: "utf8",
+                schema: yaml.schema.defaultSafe
+            }, (err, data) => {
                 if (err) {
                     cb(err, null);
                 }
                 else {
+                    if (!data) {
+                        console.error("File empty: " + files[i]);
+                        console.error("Blank content replaced by the empty object.");
+                        data = data || {};
+                    }
                     let relPath = files[i].replace(path, '')
 
                     let pathElems = relPath
@@ -32,7 +38,8 @@ let loadMessages = (path, cb) => {
 
                     let filePath = pathElems
                         .slice(0, pathElems.length -1)
-                        .join('.');
+                        .join('.')
+                        .substring(1); // drop initial dot
 
                     let fileMessages = flatten(data);
                     let flatData = flatten(data);
@@ -41,9 +48,10 @@ let loadMessages = (path, cb) => {
                         let fullPath = filePath + '.' + msg;
 
                         if (!messages.hasOwnProperty(fullPath)) {
+                            let yamlPath = msg;
                             messages[fullPath] = {
-                                filePath: filePath,
-                                yamlPath: msg,
+                                filePath,
+                                yamlPath,
                                 translations: {},
                             };
                         }
@@ -61,11 +69,7 @@ let loadMessages = (path, cb) => {
     });
 };
 
-loadMessages(process.argv[2], (err, messages) => {
-    if (err) {
-        console.log('Load error', err);
-    }
-
+function languagesFrom(messages) {
     let langs = [];
     Object.keys(messages).forEach(msg => {
         Object.keys(messages[msg].translations).forEach(lang => {
@@ -74,23 +78,35 @@ loadMessages(process.argv[2], (err, messages) => {
             }
         });
     });
+    return langs;
+}
 
-    let rows = [];
+loadMessages(process.env.APP_LOCALE_PATH, (err, messages) => {
+    if (err) {
+        console.log('Load error', err);
+    }
 
-    // First row is header
-    rows.push([ 'File path', 'YAML path' ].concat(langs));
-
+    let langs = languagesFrom(messages);
+    // Collect all terms in all languages
+    let allTerms = {};
     Object.keys(messages)
         .sort()
         .forEach(msg => {
             let message = messages[msg];
-            let translations = langs.map(lang => message.translations[lang] || '');
-            let row = [ message.filePath, message.yamlPath ].concat(translations);
-
-            rows.push(row);
+            let term = message.filePath + ":" + message.yamlPath;
+            langs.forEach(lang => {
+                allTerms[lang] = allTerms[lang] || [];
+                let content = message.translations[lang] || '';
+                allTerms[lang].push({
+                    term,
+                    translation: {
+                        content,
+                        fuzzy: 0
+                    }
+                });
+            });
         });
 
-    stringify(rows, { delimiter: '\t', quoted: true, }, (err, csv) => {
-        console.log(csv);
-    });
+    // Output all terms in all languages as JSON
+    process.stdout.write(JSON.stringify({allTerms}) + '\n');
 });
