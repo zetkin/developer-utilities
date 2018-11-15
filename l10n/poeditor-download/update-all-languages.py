@@ -1,8 +1,8 @@
 import os
-import ast
 import urllib.parse
 import urllib.request
 import yaml
+import json
 
 def poeditor_http_request(url, post_dict):
     data = urllib.parse.urlencode(post_dict)
@@ -11,7 +11,7 @@ def poeditor_http_request(url, post_dict):
     with urllib.request.urlopen(url,data) as f:
         response = f.read().decode('utf-8')
 
-    clean_response = ast.literal_eval(response)
+    clean_response = json.loads(response)
 
     try:
         assert clean_response['response']['code'] == '200'
@@ -87,7 +87,10 @@ def dump_all_terms_all_langs(langs_terms, langs=['en']):
             os.makedirs(dir_path, exist_ok=True)
             yaml_file = os.path.join(dir_path, lang+'.yaml')
             with open(yaml_file, 'w') as f:
-                yaml.dump(term_dict[directory], f, default_flow_style=False)
+                yaml.dump(term_dict[directory], f,
+                        default_flow_style = False,
+                        indent = 4,
+                        allow_unicode = True)
 
 def main():
     langs = get_langs()
