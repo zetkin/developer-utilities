@@ -155,8 +155,9 @@ def main():
     new_terms, terms_to_update = identify_terms_to_update(local_langs_data, poeditor_langs_data, langs)
     translated_terms = get_local_translations(local_langs_data, terms_to_update, langs)
 
-    term_add_json = build_term_add_json(new_terms)
-    poeditor_add_terms(term_add_json)
+    if len(new_terms) > 0:
+        term_add_json = build_term_add_json(new_terms)
+        poeditor_add_terms(term_add_json)
 
     langs_to_update = [lang for lang in langs if len(translated_terms[lang]) > 0]
     update_translation_jsons = build_update_translation_jsons(translated_terms, langs_to_update)
