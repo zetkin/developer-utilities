@@ -3,35 +3,74 @@
 This utility script converts the tree of YAML files used in the Zetkin front-end
 apps to lists of Terms for the Poeditor.com translation service.
 
-## Usage
+## Pre-requisites
+The following steps need to be taken once before running the script for the
+first time.
 
-Pre-requisites:
+### 1. Install Docker
+If you haven't already, you first need to install Docker and Docker Compose.
+You can download them for your system from [docker.com](https://docker.com).
 
-- Install [`jq`](https://stedolan.github.io/jq/download/)
-- Install `curl`
-- Prepare your `../.env` file with API key
-- `npm install`
-
-Now, you can use the scripts described below.
-
-## Update Terms (base language Terms)
-
-Find all the `en`-language Terms, to prepare the Terms for our main language.
+### 2. Configure environment
+Before running the script, you need to configure some environment variables,
+preferrably using a `.env` file. Copy `.env-sample` to create an `.env` file
+in the same directory:
 
 ```
-POEDITOR_PROJECT_ID=12345 APP_LOCALE_PATH="~/opensource/www.zetk.in/locale" ./add-and-update-project-terms.sh
+cp .env-sample .env
 ```
 
-## Update language translations
-
-Update all translations:
-
-```
-POEDITOR_PROJECT_ID=12345 ./update-all-languages.sh
-```
-
-Update Danish strings:
+Edit the `.env` file to contain the POEditor API key, project IDs and the
+correct paths to where you have cloned the Zetkin app repositories. For example:
 
 ```
-POEDITOR_PROJECT_ID=12345 TARGET_LANGUAGE=da ./update-language.sh
+# This is the API key from POEditor.com, which you can find
+# in the POEditor dashboard (or by contacting info@zetkin.org)
+POEDITOR_API_KEY=abc123def456
+
+# Per-app settings
+CALL_ZETK_IN_PROJECT_ID=123456
+CALL_ZETK_IN_PATH=~/src/zetkin/call.zetk.in
+
+ORGANIZE_ZETK_IN_PROJECT_ID=123457
+ORGANIZE_ZETK_IN_PATH=~/src/zetkin/organize.zetk.in
+
+WWW_ZETK_IN_PROJECT_ID=123458
+WWW_ZETK_IN_PATH=~/src/zetkin/www.zetk.in
+```
+
+## Running the script
+Once everything is set up, you can run (and re-run) the script using Docker
+Compose.
+
+### All translations for all apps
+To upload translations for all apps at once, run:
+```
+docker-compose up
+```
+
+The above will start one Docker container per app, mounting the input folders
+as volumes, and run the script for all the apps simultaneously.
+
+### Select apps
+To upload terms/translations for just one of the apps, run:
+```
+docker-compose run www_zetk_in
+```
+
+Or for two named apps:
+```
+docker-compose run www_zetk_in call_zetk_in
+```
+
+### Select languages
+To upload terms/translations for a select subset of languages only, run:
+```
+TARGET_LANGUAGE=sv docker-compose run www_zetk_in
+```
+
+You can specify several languages as a comma-separated list, and use variations
+of the `docker-compose` command to run one or several apps, e.g:
+```
+TARGET_LANGUAGE=sv,en docker-compose run www_zetk_in call_zetk_in
 ```

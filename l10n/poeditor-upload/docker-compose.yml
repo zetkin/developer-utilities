@@ -1,0 +1,31 @@
+version: "2"
+services:
+    call_zetk_in:
+        build: ./
+        image: poeditorul
+        volumes:
+            - "${CALL_ZETK_IN_PATH}/locale:/var/locale"
+        environment:
+            POEDITOR_API_KEY: ${POEDITOR_API_KEY}
+            POEDITOR_PROJECT_ID: ${CALL_ZETK_IN_PROJECT_ID}
+            TARGET_LANGUAGE: ${TARGET_LANGUAGE}
+
+    organize_zetk_in:
+        build: ./
+        image: poeditorul
+        volumes:
+            - "${ORGANIZE_ZETK_IN_PATH}/locale:/var/locale"
+        environment:
+            POEDITOR_API_KEY: ${POEDITOR_API_KEY}
+            POEDITOR_PROJECT_ID: ${ORGANIZE_ZETK_IN_PROJECT_ID}
+            TARGET_LANGUAGE: ${TARGET_LANGUAGE}
+
+    www_zetk_in:
+        build: ./
+        image: poeditorul
+        volumes:
+            - "${WWW_ZETK_IN_PATH}/locale:/var/locale"
+        environment:
+            POEDITOR_API_KEY: ${POEDITOR_API_KEY}
+            POEDITOR_PROJECT_ID: ${WWW_ZETK_IN_PROJECT_ID}
+            TARGET_LANGUAGE: ${TARGET_LANGUAGE}
