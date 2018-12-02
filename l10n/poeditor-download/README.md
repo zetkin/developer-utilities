@@ -30,13 +30,14 @@ POEDITOR_API_KEY=abc123def456
 
 # Per-app settings
 CALL_ZETK_IN_PROJECT_ID=123456
-CALL_ZETK_IN_PATH=~/src/zetkin/call.zetk.in
+CALL_ZETK_IN_LOCALE_PATH=~/src/zetkin/call.zetk.in/locale
 
 ORGANIZE_ZETK_IN_PROJECT_ID=123457
-ORGANIZE_ZETK_IN_PATH=~/src/zetkin/organize.zetk.in
+ORGANIZE_ZETK_IN_LOCALE_PATH=~/src/zetkin/organize.zetk.in/locale
 
 WWW_ZETK_IN_PROJECT_ID=123458
-WWW_ZETK_IN_PATH=~/src/zetkin/www.zetk.in
+WWW_ZETK_IN_LOCALE_PATH=~/src/zetkin/www.zetk.in/locale
+...
 ```
 
 ## Running the script
