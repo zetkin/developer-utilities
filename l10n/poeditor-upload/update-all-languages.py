@@ -24,10 +24,18 @@ def poeditor_http_request(url, post_dict):
     return clean_response
 
 def get_langs():
+    langs = None
+
     try:
-        langs = os.environ['TARGET_LANGUAGE'].split(',')
+        lang_spec = os.environ['TARGET_LANGUAGE']
+        if len(lang_spec) > 0:
+            langs = lang_spec.split(',')
     except KeyError:
+        pass
+
+    if langs is None:
         langs = get_local_langs()
+
     return langs
 
 def get_local_langs():
