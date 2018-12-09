@@ -22,11 +22,19 @@ def poeditor_http_request(url, post_dict):
     return clean_response
 
 def get_langs():
+    langs = None
+
     try:
-        langs = os.environ['TARGET_LANGUAGE'].split(',')
+        lang_spec = os.environ['TARGET_LANGUAGE']
+        if len(lang_spec) > 0:
+            langs = lang_spec.split(',')
     except KeyError:
+        pass
+    
+    if langs is None:
         lang_list_data = get_poeditor_langs()
         langs = parse_poeditor_lang_list(lang_list_data)
+
     return langs
 
 
