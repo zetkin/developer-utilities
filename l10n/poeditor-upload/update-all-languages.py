@@ -124,7 +124,7 @@ def get_local_lang_data(langs = ['en']):
                     term_dict[lang][full_key] = val
     return term_dict
 
-def identify_terms_to_update(local_langs_data, poeditor_langs_data, langs=['en']):
+def identify_terms_to_update(local_langs_data, poeditor_langs_data, langs=['en'], verbose = False):
     local_terms = set(local_langs_data['en'].keys())
     poeditor_terms = set(poeditor_langs_data['en'].keys())
 
@@ -141,6 +141,10 @@ def identify_terms_to_update(local_langs_data, poeditor_langs_data, langs=['en']
     locally_translated_terms = {lang: local_terms_with_translation[lang] & poeditor_terms_lacking_translation[lang] for lang in langs}
 
     terms_to_update = {lang: new_terms_with_translation[lang] | locally_translated_terms[lang] for lang in langs}
+
+    if verbose:
+        print('The following terms on POEditor do not exist locally:')
+        for term in sorted(list(poeditor_orphan_terms)): print('\t{}'.format(term))
     
     return new_terms, terms_to_update
 
@@ -167,11 +171,14 @@ def handle_new_terms(new_terms, verbose = False):
             for term in sorted(list(new_terms)): print('\t{}'.format(term))
 
         while True:
-            response = input('Add {} new terms? "No" exists. [Y/n] '.format(len(new_terms)))
+            input_response = input('Add {} new terms? "No" exists. [Y/n] '.format(len(new_terms)))
             try:
-                if len(response) == 0 or distutils.util.strtobool(response):
+                if len(input_response) == 0 or distutils.util.strtobool(input_response):
                     term_add_json = build_term_add_json(new_terms)
-                    poeditor_add_terms(term_add_json)
+                    poeditor_response = poeditor_add_terms(term_add_json)
+                    response_display = poeditor_response['result']['terms']
+                    print('Parsed {} terms, added {} new terms'.format(response_display['parsed'],
+                        response_display['added']))
                     break
                 else:
                     sys.exit(0)
@@ -180,6 +187,9 @@ def handle_new_terms(new_terms, verbose = False):
 
 def handle_translation_update(langs, translated_terms, verbose = False):
     langs_to_update = [lang for lang in langs if len(translated_terms[lang]) > 0]
+    if len(langs_to_update) == 0:
+        print('No new translations to add')
+        return
 
     query_str = 'Lang: number of translations to update\n'
     for lang in langs_to_update:
@@ -198,31 +208,36 @@ def handle_translation_update(langs, translated_terms, verbose = False):
                 print('\t{}: {}'.format(term, first_translation_line))
 
     while True:
-        response = input(query_str)
+        input_response = input(query_str)
         try:
-            if len(response) == 0 or distutils.util.strtobool(response):
+            if len(input_response) == 0 or distutils.util.strtobool(input_response):
                 update_translation_jsons = build_update_translation_jsons(translated_terms, langs_to_update)
                 for lang in langs_to_update:
-                    poeditor_update_translations(lang, update_translation_jsons[lang])
+                    poeditor_response = poeditor_update_translations(lang, update_translation_jsons[lang])
+                    response_display = poeditor_response['result']['translations']
+                    print('{}: Parsed {} translations, updated {} translations, added {} new translations'.format(lang,
+                        response_display['parsed'], response_display['updated'],  response_display['added']))
                 break
             else:
                 sys.exit(0)
         except ValueError:
             print('Please enter "yes" or "no"')
 
-def main():
-    verbose = False
+def get_verbosity():
     try:
         verbose_env = os.environ['POEDITOR_SCRIPT_VERBOSE']
         if len(verbose_env) > 0:
             verbose = bool(int(verbose_env))
+            return verbose
     except KeyError:
-        pass
+        return False
 
+def main():
+    verbose = get_verbosity()
     langs = get_langs()
     poeditor_langs_data = get_all_poeditor_terms_all_langs(langs)
     local_langs_data = get_local_lang_data(langs)
-    new_terms, terms_to_update = identify_terms_to_update(local_langs_data, poeditor_langs_data, langs)
+    new_terms, terms_to_update = identify_terms_to_update(local_langs_data, poeditor_langs_data, langs, verbose)
     translated_terms = get_local_translations(local_langs_data, terms_to_update, langs)
 
     handle_new_terms(new_terms, verbose)
