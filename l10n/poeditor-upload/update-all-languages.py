@@ -1,4 +1,6 @@
 import os
+import sys
+import distutils.util
 import urllib.parse
 import urllib.request
 import yaml
@@ -148,21 +150,75 @@ def build_update_translation_jsons(translated_terms, langs = ['en']):
     update_translation_jsons = {lang: json.dumps(update_translation_dicts[lang]) for lang in langs}
     return update_translation_jsons
 
+def handle_new_terms(new_terms, verbose = False):
+    if len(new_terms) == 0:
+        print('No new terms to add')
+    else:
+        if verbose:
+            print('The following terms will be added:')
+            for term in sorted(list(new_terms)): print('\t{}'.format(term))
+
+        while True:
+            response = input('Add {} new terms? "No" exists. [Y/n] '.format(len(new_terms)))
+            try:
+                if len(response) == 0 or distutils.util.strtobool(response):
+                    term_add_json = build_term_add_json(new_terms)
+                    poeditor_add_terms(term_add_json)
+                    break
+                else:
+                    sys.exit(0)
+            except ValueError:
+                print('Please enter "yes" or "no"')
+
+def handle_translation_update(langs, translated_terms, verbose = False):
+    langs_to_update = [lang for lang in langs if len(translated_terms[lang]) > 0]
+
+    query_str = 'Lang: number of translations to update\n'
+    for lang in langs_to_update:
+        query_str += '{}: {}\n'.format(lang, len(translated_terms[lang]))
+    query_str += 'Update translations? [Y/n] '
+
+    if verbose:
+        print('The following translations will be added:')
+        for lang in langs_to_update:
+            print('{}:'.format(lang))
+            for term, translation in sorted(list(translated_terms[lang].items())):
+                translation_lines = translation.splitlines()
+                first_translation_line = translation_lines[0]
+                if len(translation_lines) > 1:
+                    first_translation_line += '...'
+                print('\t{}: {}'.format(term, first_translation_line))
+
+    while True:
+        response = input(query_str)
+        try:
+            if len(response) == 0 or distutils.util.strtobool(response):
+                update_translation_jsons = build_update_translation_jsons(translated_terms, langs_to_update)
+                for lang in langs_to_update:
+                    poeditor_update_translations(lang, update_translation_jsons[lang])
+                break
+            else:
+                sys.exit(0)
+        except ValueError:
+            print('Please enter "yes" or "no"')
+
 def main():
+    verbose = False
+    try:
+        verbose_env = os.environ['POEDITOR_SCRIPT_VERBOSE']
+        if len(verbose_env) > 0:
+            verbose = bool(int(verbose_env))
+    except KeyError:
+        pass
+
     langs = get_langs()
     poeditor_langs_data = get_all_poeditor_terms_all_langs(langs)
     local_langs_data = get_local_lang_data(langs)
     new_terms, terms_to_update = identify_terms_to_update(local_langs_data, poeditor_langs_data, langs)
     translated_terms = get_local_translations(local_langs_data, terms_to_update, langs)
 
-    if len(new_terms) > 0:
-        term_add_json = build_term_add_json(new_terms)
-        poeditor_add_terms(term_add_json)
-
-    langs_to_update = [lang for lang in langs if len(translated_terms[lang]) > 0]
-    update_translation_jsons = build_update_translation_jsons(translated_terms, langs_to_update)
-    for lang in langs_to_update:
-        poeditor_update_translations(lang, update_translation_jsons[lang])
+    handle_new_terms(new_terms, verbose)
+    handle_translation_update(langs, translated_terms, verbose)
 
 if __name__=='__main__':
     main()
