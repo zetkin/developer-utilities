@@ -26,8 +26,8 @@ def poeditor_http_request(url, post_dict):
 
 
 def get_langs():
-    lang_spec = os.environ.get('TARGET_LANGUAGE')
-    if lang_spec and len(lang_spec) > 0:
+    lang_spec = os.environ.get('TARGET_LANGUAGE', '')
+    if len(lang_spec) > 0:
         return lang_spec.split(',')
     else:
         return get_local_langs()
@@ -241,10 +241,8 @@ def handle_translation_update(langs, translated_terms, verbose=False):
 
 
 def get_verbosity():
-    verbose_env = os.environ.get('POEDITOR_SCRIPT_VERBOSE', '0')
-    if len(verbose_env) > 0:
-        return bool(int(verbose_env))
-    return False
+    verbose_env = os.environ.get('VERBOSE', '0')
+    return verbose_env == '1'
 
 
 def main():

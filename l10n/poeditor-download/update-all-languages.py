@@ -28,7 +28,7 @@ def poeditor_http_request(url, post_dict):
 
 
 def get_langs():
-    lang_spec = os.environ.get('TARGET_LANGUAGE')
+    lang_spec = os.environ.get('TARGET_LANGUAGE', '')
     if len(lang_spec) > 0:
         return lang_spec.split(',')
     else:
@@ -55,8 +55,8 @@ def parse_poeditor_lang_list(lang_list_data):
 def get_lang_data(lang):
     lang_data_url = 'https://api.poeditor.com/v2/terms/list'
     post_dict = {
-        'api_token': os.environ.get('POEDITOR_API_KEY'),
-        'id': os.environ.get('POEDITOR_PROJECT_ID'),
+        'api_token': os.environ['POEDITOR_API_KEY'],
+        'id': os.environ['POEDITOR_PROJECT_ID'],
         'language': lang
     }
 
@@ -155,11 +155,34 @@ def check_continue(message):
             print('Please enter "yes" or "no"')
 
 
+def get_verbosity():
+    verbose_env = os.environ.get('VERBOSE', '0')
+    return verbose_env == '1'
+
+
+def summarize_result(langs_terms, langs):
+    if get_verbosity():
+        for lang in langs:
+            num_terms = count_terms(langs_terms[lang])
+            print('{}: {} translated terms fetched'.format(lang, num_terms))
+
+
+def count_terms(term_dict):
+    count = 0
+    for key, item in term_dict.items():
+        if type(item) == dict:
+            count += count_terms(item)
+        elif item != '':
+            count += 1
+    return count
+
+
 def main():
     langs = get_langs()
     langs_terms, langs_data = get_all_terms_all_langs(langs)
     check_ICU(langs_data, langs)
     dump_all_terms_all_langs(langs_terms, langs)
+    summarize_result(langs_terms, langs)
 
 
 if __name__ == '__main__':

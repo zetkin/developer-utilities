@@ -37,6 +37,9 @@ ORGANIZE_ZETK_IN_LOCALE_PATH=~/src/zetkin/organize.zetk.in/locale
 
 WWW_ZETK_IN_PROJECT_ID=123458
 WWW_ZETK_IN_LOCALE_PATH=~/src/zetkin/www.zetk.in/locale
+
+# Enable more verbose output
+VERBOSE=1
 ...
 ```
 

@@ -9,7 +9,7 @@ services:
             POEDITOR_API_KEY: ${POEDITOR_API_KEY}
             POEDITOR_PROJECT_ID: ${CALL_ZETK_IN_PROJECT_ID}
             TARGET_LANGUAGE: ${TARGET_LANGUAGE}
-            POEDITOR_SCRIPT_VERBOSE: ${POEDITOR_SCRIPT_VERBOSE}
+            VERBOSE: ${VERBOSE}
 
     organize_zetk_in:
         build: ./
@@ -20,7 +20,7 @@ services:
             POEDITOR_API_KEY: ${POEDITOR_API_KEY}
             POEDITOR_PROJECT_ID: ${ORGANIZE_ZETK_IN_PROJECT_ID}
             TARGET_LANGUAGE: ${TARGET_LANGUAGE}
-            POEDITOR_SCRIPT_VERBOSE: ${POEDITOR_SCRIPT_VERBOSE}
+            VERBOSE: ${VERBOSE}
 
     www_zetk_in:
         build: ./
@@ -31,7 +31,7 @@ services:
             POEDITOR_API_KEY: ${POEDITOR_API_KEY}
             POEDITOR_PROJECT_ID: ${WWW_ZETK_IN_PROJECT_ID}
             TARGET_LANGUAGE: ${TARGET_LANGUAGE}
-            POEDITOR_SCRIPT_VERBOSE: ${POEDITOR_SCRIPT_VERBOSE}
+            VERBOSE: ${VERBOSE}
 
     ps_sms:
         build: ./
@@ -42,7 +42,7 @@ services:
             POEDITOR_API_KEY: ${POEDITOR_API_KEY}
             POEDITOR_PROJECT_ID: ${PS_SMS_PROJECT_ID}
             TARGET_LANGUAGE: ${TARGET_LANGUAGE}
-            POEDITOR_SCRIPT_VERBOSE: ${POEDITOR_SCRIPT_VERBOSE}
+            VERBOSE: ${VERBOSE}
 
     ps_email:
         build: ./
@@ -53,4 +53,4 @@ services:
             POEDITOR_API_KEY: ${POEDITOR_API_KEY}
             POEDITOR_PROJECT_ID: ${PS_EMAIL_PROJECT_ID}
             TARGET_LANGUAGE: ${TARGET_LANGUAGE}
-            POEDITOR_SCRIPT_VERBOSE: ${POEDITOR_SCRIPT_VERBOSE}
+            VERBOSE: ${VERBOSE}
