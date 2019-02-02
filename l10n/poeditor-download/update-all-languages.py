@@ -28,26 +28,20 @@ def poeditor_http_request(url, post_dict):
 
 
 def get_langs():
-    langs = None
-
-    try:
-        lang_spec = os.environ['TARGET_LANGUAGE']
-        if len(lang_spec) > 0:
-            langs = lang_spec.split(',')
-    except KeyError:
-        pass
-
-    if langs is None:
+    lang_spec = os.environ.get('TARGET_LANGUAGE')
+    if len(lang_spec) > 0:
+        return lang_spec.split(',')
+    else:
         lang_list_data = get_poeditor_langs()
-        langs = parse_poeditor_lang_list(lang_list_data)
-
-    return langs
+        return parse_poeditor_lang_list(lang_list_data)
 
 
 def get_poeditor_langs():
     get_langs_url = 'https://api.poeditor.com/v2/languages/list'
-    post_dict = {'api_token': os.environ['POEDITOR_API_KEY'],
-            'id': os.environ['POEDITOR_PROJECT_ID']}
+    post_dict = {
+        'api_token': os.environ['POEDITOR_API_KEY'],
+        'id': os.environ['POEDITOR_PROJECT_ID']
+    }
 
     lang_list_data = poeditor_http_request(get_langs_url, post_dict)
     return lang_list_data
@@ -60,9 +54,11 @@ def parse_poeditor_lang_list(lang_list_data):
 
 def get_lang_data(lang):
     lang_data_url = 'https://api.poeditor.com/v2/terms/list'
-    post_dict = {'api_token': os.environ['POEDITOR_API_KEY'],
-            'id': os.environ['POEDITOR_PROJECT_ID'],
-            'language': lang}
+    post_dict = {
+        'api_token': os.environ.get('POEDITOR_API_KEY'),
+        'id': os.environ.get('POEDITOR_PROJECT_ID'),
+        'language': lang
+    }
 
     lang_data = poeditor_http_request(lang_data_url, post_dict)
     return lang_data

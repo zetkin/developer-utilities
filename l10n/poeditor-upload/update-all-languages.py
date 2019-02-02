@@ -26,19 +26,11 @@ def poeditor_http_request(url, post_dict):
 
 
 def get_langs():
-    langs = None
-
-    try:
-        lang_spec = os.environ['TARGET_LANGUAGE']
-        if len(lang_spec) > 0:
-            langs = lang_spec.split(',')
-    except KeyError:
-        pass
-
-    if langs is None:
-        langs = get_local_langs()
-
-    return langs
+    lang_spec = os.environ.get('TARGET_LANGUAGE')
+    if lang_spec and len(lang_spec) > 0:
+        return lang_spec.split(',')
+    else:
+        return get_local_langs()
 
 
 def get_local_langs():
@@ -52,9 +44,11 @@ def get_local_langs():
 
 def get_poeditor_lang_data(lang):
     url = 'https://api.poeditor.com/v2/terms/list'
-    post_dict = {'api_token': os.environ['POEDITOR_API_KEY'],
-            'id': os.environ['POEDITOR_PROJECT_ID'],
-            'language': lang}
+    post_dict = {
+        'api_token': os.environ['POEDITOR_API_KEY'],
+        'id': os.environ['POEDITOR_PROJECT_ID'],
+        'language': lang
+    }
 
     response = poeditor_http_request(url, post_dict)
     return response
@@ -79,10 +73,12 @@ def get_all_poeditor_terms_all_langs(langs=['en']):
 
 def poeditor_add_terms(data):
     url = 'https://api.poeditor.com/v2/terms/add'
-    post_dict = {'api_token': os.environ['POEDITOR_API_KEY'],
-            'id': os.environ['POEDITOR_PROJECT_ID'],
-            'data': data,
-            'fuzzy': '1'}
+    post_dict = {
+        'api_token': os.environ['POEDITOR_API_KEY'],
+        'id': os.environ['POEDITOR_PROJECT_ID'],
+        'data': data,
+        'fuzzy': '1'
+    }
 
     response = poeditor_http_request(url, post_dict)
     return response
@@ -245,13 +241,10 @@ def handle_translation_update(langs, translated_terms, verbose=False):
 
 
 def get_verbosity():
-    try:
-        verbose_env = os.environ['VERBOSE']
-        if len(verbose_env) > 0:
-            verbose = bool(int(verbose_env))
-            return verbose
-    except KeyError:
-        return False
+    verbose_env = os.environ.get('VERBOSE', '0')
+    if len(verbose_env) > 0:
+        return bool(int(verbose_env))
+    return False
 
 
 def main():
