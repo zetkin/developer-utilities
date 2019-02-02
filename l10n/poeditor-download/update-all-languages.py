@@ -189,8 +189,7 @@ def main():
     check_ICU(langs_data, langs)
     dump_all_terms_all_langs(langs_terms, langs)
     summarize_result(langs_terms, langs)
-    return langs_terms
 
 
 if __name__ == '__main__':
-    lt=main()
+    main()
