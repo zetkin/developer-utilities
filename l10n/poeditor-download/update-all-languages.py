@@ -1,8 +1,12 @@
 import os
+import sys
 import urllib.parse
 import urllib.request
 import yaml
 import json
+import pyseeyou
+from parsimonious.exceptions import IncompleteParseError
+import distutils.util
 
 def poeditor_http_request(url, post_dict):
     data = urllib.parse.urlencode(post_dict)
@@ -36,7 +40,6 @@ def get_langs():
         langs = parse_poeditor_lang_list(lang_list_data)
 
     return langs
-
 
 def get_poeditor_langs():
     get_langs_url = 'https://api.poeditor.com/v2/languages/list'
@@ -79,7 +82,7 @@ def get_all_terms_all_langs(langs = ['en']):
     for lang in langs:
         langs_data[lang] = get_lang_data(lang)
         langs_terms[lang] = parse_lang_data(langs_data[lang])
-    return langs_terms
+    return langs_terms,langs_data
 
 def str_representer(dumper, data):
     if len(data.splitlines()) == 1:
@@ -100,11 +103,55 @@ def dump_all_terms_all_langs(langs_terms, langs=['en']):
                         indent = 4,
                         allow_unicode = True)
 
+def check_ICU(langs_data, langs=['en']):
+    ICU_terms = []
+    bad_ICU = []
+    for term_entry in langs_data['en']['result']['terms']:
+        term = term_entry['term']
+        translation = term_entry['translation']['content']
+        if '{' in translation or '}' in translation:
+            try:
+                pyseeyou.ICUMessageFormat.parse(translation)
+                ICU_terms.append(term)
+            except IncompleteParseError:
+                print('en: Incorrect ICU in term {}'.format(term))
+                bad_ICU.append(term)
+    ICU_terms = set(ICU_terms)
+    for lang in langs:
+        if lang == 'en':
+            continue
+        for term_entry in langs_data[lang]['result']['terms']:
+            term = term_entry['term']
+            translation = term_entry['translation']['content']
+            if '{' in translation or '}' in translation or term in ICU_terms:
+                if term not in ICU_terms:
+                    print('{}: Term {} ICU formatted, but English translation is not'.format(lang, term))
+                    bad_ICU.append(term)
+                try:
+                    pyseeyou.ICUMessageFormat.parse(translation)
+                except IncompleteParseError:
+                    bad_ICU.append(term)
+                    print('{}: Incorrect ICU in term {}'.format(lang, term))
+    if len(bad_ICU) > 0:
+        message = 'Bad or mismatching ICUs detected. Ignoring overwrites local translations, not ignoring exits without modifying local translations. Ignore? [Y/n] '
+        check_continue(message)
+
+def check_continue(message):
+    while True:
+        input_response = input(message)
+        try:
+            if len(input_response) == 0 or distutils.util.strtobool(input_response):
+                return
+            else:
+                sys.exit(0)
+        except ValueError:
+            print('Please enter "yes" or "no"')
+
 def main():
     langs = get_langs()
-    langs_terms = get_all_terms_all_langs(langs)
+    langs_terms,langs_data = get_all_terms_all_langs(langs)
+    check_ICU(langs_data, langs)
     dump_all_terms_all_langs(langs_terms, langs)
-    return langs_terms
 
 if __name__=='__main__':
     main()
