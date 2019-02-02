@@ -133,7 +133,7 @@ def check_ICU(langs_data, langs=['en']):
                     bad_ICU.append(term)
                     print('{}: Incorrect ICU in term {}'.format(lang, term))
     if len(bad_ICU) > 0:
-        message = 'Bad or mismatching ICUs detected. Ignoring overwrites local translations, not ignoring exits without modifying local translations. Ignore? [Y/n] '
+        message = 'Bad or mismatching ICUs detected. Continuing will overwrite current translations with possibly bad ICUs. Continue? [Y/n] '
         check_continue(message)
 
 def check_continue(message):
