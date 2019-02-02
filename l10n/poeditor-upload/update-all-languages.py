@@ -6,22 +6,24 @@ import urllib.request
 import yaml
 import json
 
+
 def poeditor_http_request(url, post_dict):
     data = urllib.parse.urlencode(post_dict)
     data = data.encode('ascii')
-    
-    with urllib.request.urlopen(url,data) as f:
+
+    with urllib.request.urlopen(url, data) as f:
         response = f.read().decode('utf-8')
 
     clean_response = json.loads(response)
 
     try:
         assert clean_response['response']['code'] == '200'
-    except AssertionError as err:
+    except AssertionError:
         print('Bad response from poeditor.com, code {}'.format(clean_response['response']['code']))
         raise
 
     return clean_response
+
 
 def get_langs():
     langs = None
@@ -38,6 +40,7 @@ def get_langs():
 
     return langs
 
+
 def get_local_langs():
     locale_dir = os.environ['APP_LOCALE_DIR']
     file_names = set()
@@ -45,6 +48,7 @@ def get_local_langs():
         file_names |= set(files)
     langs = [file_name[:-5] for file_name in file_names if file_name[-5:] == '.yaml']
     return langs
+
 
 def get_poeditor_lang_data(lang):
     url = 'https://api.poeditor.com/v2/terms/list'
@@ -55,6 +59,7 @@ def get_poeditor_lang_data(lang):
     response = poeditor_http_request(url, post_dict)
     return response
 
+
 def parse_poeditor_lang_data(lang_data):
     term_dict = {}
     for term_data in lang_data['result']['terms']:
@@ -62,13 +67,15 @@ def parse_poeditor_lang_data(lang_data):
         term_dict[term] = term_data['translation']['content']
     return term_dict
 
-def get_all_poeditor_terms_all_langs(langs = ['en']):
+
+def get_all_poeditor_terms_all_langs(langs=['en']):
     langs_data = {}
     langs_terms = {}
     for lang in langs:
         langs_data[lang] = get_poeditor_lang_data(lang)
         langs_terms[lang] = parse_poeditor_lang_data(langs_data[lang])
     return langs_terms
+
 
 def poeditor_add_terms(data):
     url = 'https://api.poeditor.com/v2/terms/add'
@@ -80,18 +87,22 @@ def poeditor_add_terms(data):
     response = poeditor_http_request(url, post_dict)
     return response
 
+
 def poeditor_update_translations(lang, data):
     url = 'https://api.poeditor.com/v2/languages/update'
-    post_dict = {'api_token': os.environ['POEDITOR_API_KEY'],
-            'id': os.environ['POEDITOR_PROJECT_ID'],
-            'language': lang,
-            'data': data,
-            'fuzzy':'1'}
+    post_dict = {
+        'api_token': os.environ['POEDITOR_API_KEY'],
+        'id': os.environ['POEDITOR_PROJECT_ID'],
+        'language': lang,
+        'data': data,
+        'fuzzy': '1'
+    }
 
     response = poeditor_http_request(url, post_dict)
     return response
 
-def flatten_yaml_dict(yaml_dict, parent_key = []):
+
+def flatten_yaml_dict(yaml_dict, parent_key=[]):
     flat_dict = {}
     if yaml_dict is None:
         return flat_dict
@@ -104,9 +115,10 @@ def flatten_yaml_dict(yaml_dict, parent_key = []):
             flat_dict[full_key] = val
     return flat_dict
 
-def get_local_lang_data(langs = ['en']):
+
+def get_local_lang_data(langs=['en']):
     locale_dir = os.environ['APP_LOCALE_DIR']
-    term_dict = {lang:{} for lang in langs}
+    term_dict = {lang: {} for lang in langs}
     for dirname, subdirs, files in os.walk(locale_dir):
         if len(files) == 0:
             continue
@@ -117,20 +129,21 @@ def get_local_lang_data(langs = ['en']):
             except FileNotFoundError:
                 continue
             else:
-                dir_part_key = os.path.relpath(dirname, locale_dir).replace('/','.')
+                dir_part_key = os.path.relpath(dirname, locale_dir).replace('/', '.')
                 flat_lang_data = flatten_yaml_dict(lang_data)
                 for yaml_part_key, val in flat_lang_data.items():
                     full_key = dir_part_key + ':' + yaml_part_key
                     term_dict[lang][full_key] = val
     return term_dict
 
-def identify_terms_to_update(local_langs_data, poeditor_langs_data, langs=['en'], verbose = False):
+
+def identify_terms_to_update(local_langs_data, poeditor_langs_data, langs=['en'], verbose=False):
     local_terms = set(local_langs_data['en'].keys())
     poeditor_terms = set(poeditor_langs_data['en'].keys())
 
-    local_langs_data_with_translation = {lang: {term:local_langs_data[lang][term] for term in local_langs_data[lang].keys() if local_langs_data[lang][term] != ''} for lang in langs}
+    local_langs_data_with_translation = {lang: {term: local_langs_data[lang][term] for term in local_langs_data[lang].keys() if local_langs_data[lang][term] != ''} for lang in langs}
     local_terms_with_translation = {lang: local_terms & set(local_langs_data_with_translation[lang].keys()) for lang in langs}
-    
+
     new_terms = local_terms - poeditor_terms
     new_terms_with_translation = {lang: new_terms & set(local_langs_data_with_translation[lang].keys()) for lang in langs}
 
@@ -144,31 +157,37 @@ def identify_terms_to_update(local_langs_data, poeditor_langs_data, langs=['en']
 
     if verbose:
         print('The following terms on POEditor do not exist locally:')
-        for term in sorted(list(poeditor_orphan_terms)): print('\t{}'.format(term))
-    
+        for term in sorted(list(poeditor_orphan_terms)):
+            print('\t{}'.format(term))
+
     return new_terms, terms_to_update
 
-def get_local_translations(local_langs_data, terms_to_update, langs = ['en']):
+
+def get_local_translations(local_langs_data, terms_to_update, langs=['en']):
     translated_terms = {lang: {term: local_langs_data[lang][term] for term in terms_to_update[lang]} for lang in langs}
     return translated_terms
+
 
 def build_term_add_json(new_terms):
     term_dict_list = [{'term': term} for term in new_terms]
     data_string = json.dumps(term_dict_list)
     return data_string
 
-def build_update_translation_jsons(translated_terms, langs = ['en']):
-    update_translation_dicts = {lang: [{'term':term, 'translation': {'content':translation, 'fuzzy':'1'}} for term, translation in translated_terms[lang].items()] for lang in langs}
+
+def build_update_translation_jsons(translated_terms, langs=['en']):
+    update_translation_dicts = {lang: [{'term': term, 'translation': {'content': translation, 'fuzzy': '1'}} for term, translation in translated_terms[lang].items()] for lang in langs}
     update_translation_jsons = {lang: json.dumps(update_translation_dicts[lang]) for lang in langs}
     return update_translation_jsons
 
-def handle_new_terms(new_terms, verbose = False):
+
+def handle_new_terms(new_terms, verbose=False):
     if len(new_terms) == 0:
         print('No new terms to add')
     else:
         if verbose:
             print('The following terms will be added:')
-            for term in sorted(list(new_terms)): print('\t{}'.format(term))
+            for term in sorted(list(new_terms)):
+                print('\t{}'.format(term))
 
         while True:
             input_response = input('Add {} new terms? "No" exists. [Y/n] '.format(len(new_terms)))
@@ -185,7 +204,8 @@ def handle_new_terms(new_terms, verbose = False):
             except ValueError:
                 print('Please enter "yes" or "no"')
 
-def handle_translation_update(langs, translated_terms, verbose = False):
+
+def handle_translation_update(langs, translated_terms, verbose=False):
     langs_to_update = [lang for lang in langs if len(translated_terms[lang]) > 0]
     if len(langs_to_update) == 0:
         print('No new translations to add')
@@ -216,12 +236,13 @@ def handle_translation_update(langs, translated_terms, verbose = False):
                     poeditor_response = poeditor_update_translations(lang, update_translation_jsons[lang])
                     response_display = poeditor_response['result']['translations']
                     print('{}: Parsed {} translations, updated {} translations, added {} new translations'.format(lang,
-                        response_display['parsed'], response_display['updated'],  response_display['added']))
+                        response_display['parsed'], response_display['updated'], response_display['added']))
                 break
             else:
                 sys.exit(0)
         except ValueError:
             print('Please enter "yes" or "no"')
+
 
 def get_verbosity():
     try:
@@ -231,6 +252,7 @@ def get_verbosity():
             return verbose
     except KeyError:
         return False
+
 
 def main():
     verbose = get_verbosity()
@@ -243,6 +265,6 @@ def main():
     handle_new_terms(new_terms, verbose)
     handle_translation_update(langs, translated_terms, verbose)
 
-if __name__=='__main__':
-    main()
 
+if __name__ == '__main__':
+    main()
