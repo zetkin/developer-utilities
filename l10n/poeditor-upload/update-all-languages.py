@@ -246,7 +246,7 @@ def handle_translation_update(langs, translated_terms, verbose=False):
 
 def get_verbosity():
     try:
-        verbose_env = os.environ['POEDITOR_SCRIPT_VERBOSE']
+        verbose_env = os.environ['VERBOSE']
         if len(verbose_env) > 0:
             verbose = bool(int(verbose_env))
             return verbose
