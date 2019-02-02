@@ -28,7 +28,7 @@ def poeditor_http_request(url, post_dict):
 
 
 def get_langs():
-    lang_spec = os.environ.get('TARGET_LANGUAGE')
+    lang_spec = os.environ.get('TARGET_LANGUAGE', '')
     if len(lang_spec) > 0:
         return lang_spec.split(',')
     else:
@@ -55,8 +55,8 @@ def parse_poeditor_lang_list(lang_list_data):
 def get_lang_data(lang):
     lang_data_url = 'https://api.poeditor.com/v2/terms/list'
     post_dict = {
-        'api_token': os.environ.get('POEDITOR_API_KEY'),
-        'id': os.environ.get('POEDITOR_PROJECT_ID'),
+        'api_token': os.environ['POEDITOR_API_KEY'],
+        'id': os.environ['POEDITOR_PROJECT_ID'],
         'language': lang
     }
 

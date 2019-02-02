@@ -26,8 +26,8 @@ def poeditor_http_request(url, post_dict):
 
 
 def get_langs():
-    lang_spec = os.environ.get('TARGET_LANGUAGE')
-    if lang_spec and len(lang_spec) > 0:
+    lang_spec = os.environ.get('TARGET_LANGUAGE', '')
+    if len(lang_spec) > 0:
         return lang_spec.split(',')
     else:
         return get_local_langs()
