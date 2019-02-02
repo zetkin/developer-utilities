@@ -157,9 +157,7 @@ def check_continue(message):
 
 def get_verbosity():
     verbose_env = os.environ.get('VERBOSE', '0')
-    if len(verbose_env) > 0:
-        return bool(int(verbose_env))
-    return False
+    return verbose_env == '1'
 
 
 def summarize_result(langs_terms, langs):

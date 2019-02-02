@@ -242,9 +242,7 @@ def handle_translation_update(langs, translated_terms, verbose=False):
 
 def get_verbosity():
     verbose_env = os.environ.get('VERBOSE', '0')
-    if len(verbose_env) > 0:
-        return bool(int(verbose_env))
-    return False
+    return verbose_env == '1'
 
 
 def main():
