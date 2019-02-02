@@ -159,12 +159,38 @@ def check_continue(message):
             print('Please enter "yes" or "no"')
 
 
+def get_verbosity():
+    verbose_env = os.environ.get('POEDITOR_SCRIPT_VERBOSE', '0')
+    if len(verbose_env) > 0:
+        return bool(int(verbose_env))
+    return False
+
+
+def summarize_result(langs_terms, langs):
+    if get_verbosity():
+        for lang in langs:
+            num_terms = count_terms(langs_terms[lang])
+            print('{}: {} translated terms fetched'.format(lang, num_terms))
+
+
+def count_terms(term_dict):
+    count = 0
+    for key, item in term_dict.items():
+        if type(item) == dict:
+            count += count_terms(item)
+        elif item != '':
+            count += 1
+    return count
+
+
 def main():
     langs = get_langs()
     langs_terms, langs_data = get_all_terms_all_langs(langs)
     check_ICU(langs_data, langs)
     dump_all_terms_all_langs(langs_terms, langs)
+    summarize_result(langs_terms, langs)
+    return langs_terms
 
 
 if __name__ == '__main__':
-    main()
+    lt=main()
