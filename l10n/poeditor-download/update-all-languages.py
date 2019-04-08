@@ -72,10 +72,11 @@ def parse_lang_data(lang_data):
         path = os.path.join(locale_dir, *folders, '')
         properties = term_data['term'].split(':')[1].split('.')
         translation_content = term_data['translation']['content']
-        c_dict = term_dict.setdefault(path, {})
-        for prop in properties[:-1]:
-            c_dict = c_dict.setdefault(prop, {})
-        c_dict[properties[-1]] = translation_content
+        if len(translation_content) > 0:
+            c_dict = term_dict.setdefault(path, {})
+            for prop in properties[:-1]:
+                c_dict = c_dict.setdefault(prop, {})
+            c_dict[properties[-1]] = translation_content
     return term_dict
 
 
