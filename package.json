@@ -1,0 +1,24 @@
+{
+  "name": "zetkin-developer-utils",
+  "version": "1.0.0",
+  "description": "Zetkin developer utilities",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/zetkin/zetkin-i18n-utils.js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zetkin/zetkin-i18n-utils.js/issues"
+  },
+  "homepage": "https://github.com/zetkin/zetkin-i18n-utils.js#readme",
+  "dependencies": {
+    "axios": "^0.19.1",
+    "node-yaml": "^3.0.3",
+    "recursive-readdir": "^2.2.2"
+  }
+}
