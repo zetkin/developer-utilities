@@ -1,3 +1,0 @@
-pyseeyou==0.5.0
-parsimonious==0.8.1
-pyyaml==3.13
