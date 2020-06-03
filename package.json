@@ -18,6 +18,7 @@
   "homepage": "https://github.com/zetkin/zetkin-i18n-utils.js#readme",
   "dependencies": {
     "axios": "^0.19.1",
+    "messageformat": "^2.3.0",
     "node-yaml": "^3.0.3",
     "recursive-readdir": "^2.2.2"
   }

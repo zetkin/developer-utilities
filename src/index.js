@@ -1,4 +1,5 @@
 const axios = require('axios');
+const MessageFormat = require('messageformat');
 const qs = require('querystring');
 const recurse = require('recursive-readdir');
 const util = require('util');
@@ -23,6 +24,7 @@ const cmdLoadTranslations = (lang) => {
 
     const stats = {
         ignored: [],
+        invalid: [],
         unchanged: [],
         updated: [],
     };
@@ -35,21 +37,40 @@ const cmdLoadTranslations = (lang) => {
             return poeRequest('/terms/list', { id: PROJECT_ID, language: lang });
         })
         .then(data => {
+            const mf = new MessageFormat(lang);
+
             data.result.terms.forEach(term => {
                 if (localTerms.en.hasOwnProperty(term.term)) {
-                    if (oldLangTerms[term.term] != term.translation.content) {
+                    const translation = term.translation.content
+                    if (oldLangTerms[term.term] != translation) {
                         stats.updated.push(term.term);
                     }
                     else {
                         stats.unchanged.push(term.term);
                     }
 
-                    localTerms[lang][term.term] = term.translation.content;
+                    // Check if ICU message format, and validate syntax
+                    if (translation.indexOf('{') >= 0) {
+                        try {
+                            const msg = mf.compile(translation);
+                        }
+                        catch (err) {
+                            stats.invalid.push(term.term);
+                        }
+                    }
+
+                    localTerms[lang][term.term] = translation;
                 }
                 else {
                     stats.ignored.push(term.term);
                 }
             });
+
+            if (stats.invalid.length) {
+                console.warn('Found invalid terms');
+                stats.invalid.forEach(term => console.log('- ', term));
+                throw new Error('Invalid MessageFormat syntax');
+            }
 
             let dataByFile = {};
             Object.keys(localTerms.en).forEach(term => {
@@ -93,6 +114,10 @@ const cmdLoadTranslations = (lang) => {
             console.log('Ignored: ' + stats.ignored.length);
             console.log('Unchanged: ' + stats.unchanged.length);
             console.log('Updated: ' + stats.updated.length);
+        })
+        .catch(err => {
+            console.log('Bailed due to an error');
+            console.error(err);
         });
 }
 
