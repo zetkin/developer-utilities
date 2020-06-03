@@ -38,6 +38,8 @@ const cmdLoadTranslations = (lang) => {
         })
         .then(data => {
             const mf = new MessageFormat(lang);
+            const argExp = /\{\s*[a-zA-Z0-9]*\s*\}/g;
+            const parseArgs = s => (s.match(argExp) || []).map(a => a.slice(1, -1).trim());
 
             data.result.terms.forEach(term => {
                 if (localTerms.en.hasOwnProperty(term.term)) {
@@ -51,11 +53,22 @@ const cmdLoadTranslations = (lang) => {
 
                     // Check if ICU message format, and validate syntax
                     if (translation.indexOf('{') >= 0) {
+                        // Validate basic syntax
                         try {
                             const msg = mf.compile(translation);
                         }
                         catch (err) {
                             stats.invalid.push(term.term);
+                        }
+
+                        // Get list of args (placeholders) and compare
+                        const enArgs = parseArgs(localTerms.en[term.term]);
+                        const transArgs = parseArgs(translation);
+                        for (const arg of transArgs) {
+                            if (!enArgs.includes(arg)) {
+                                stats.invalid.push(term.term);
+                                break;
+                            }
                         }
                     }
 
