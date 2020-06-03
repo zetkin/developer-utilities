@@ -64,6 +64,11 @@ const cmdLoadTranslations = (lang) => {
                         // Get list of args (placeholders) and compare
                         const enArgs = parseArgs(localTerms.en[term.term]);
                         const transArgs = parseArgs(translation);
+
+                        if (enArgs.length != transArgs.length) {
+                            stats.invalid.push(term.term);
+                        }
+
                         for (const arg of transArgs) {
                             if (!enArgs.includes(arg)) {
                                 stats.invalid.push(term.term);
