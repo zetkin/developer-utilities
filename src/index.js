@@ -74,27 +74,30 @@ const cmdLoadTranslations = (lang) => {
 
             let dataByFile = {};
             Object.keys(localTerms.en).forEach(term => {
-                const fileDotPath = term.split(':')[0];
-                if (!dataByFile[fileDotPath]) {
-                    dataByFile[fileDotPath] = {};
-                }
-
-                const yamlDotPath = term.split(':')[1];
-                const yamlPathElems = yamlDotPath.split('.');
-                let obj = dataByFile[fileDotPath];
-                yamlPathElems.forEach((elem, idx) => {
-                    if (idx == yamlPathElems.length-1) {
-                        // Last element in path is the actual value
-                        obj[elem] = localTerms[lang][term];
+                // Only write those which have actually been translated
+                if (localTerms[lang][term]) {
+                    const fileDotPath = term.split(':')[0];
+                    if (!dataByFile[fileDotPath]) {
+                        dataByFile[fileDotPath] = {};
                     }
-                    else {
-                        if (!obj.hasOwnProperty(elem)) {
-                            obj[elem] = {};
+
+                    const yamlDotPath = term.split(':')[1];
+                    const yamlPathElems = yamlDotPath.split('.');
+                    let obj = dataByFile[fileDotPath];
+                    yamlPathElems.forEach((elem, idx) => {
+                        if (idx == yamlPathElems.length-1) {
+                            // Last element in path is the actual value
+                            obj[elem] = localTerms[lang][term];
                         }
+                        else {
+                            if (!obj.hasOwnProperty(elem)) {
+                                obj[elem] = {};
+                            }
 
-                        obj = obj[elem];
-                    }
-                });
+                            obj = obj[elem];
+                        }
+                    });
+                }
             });
 
             const yamlWrite = util.promisify(yaml.write);
