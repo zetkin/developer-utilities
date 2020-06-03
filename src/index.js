@@ -30,7 +30,7 @@ const cmdLoadTranslations = (lang) => {
     loadMessages(LOCALE_PATH, '')
         .then(messages => {
             localTerms = messages;
-            oldLangTerms = localTerms[lang];
+            oldLangTerms = localTerms[lang] || {};
             localTerms[lang] = {};
             return poeRequest('/terms/list', { id: PROJECT_ID, language: lang });
         })
