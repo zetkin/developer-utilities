@@ -1,5 +1,6 @@
 const axios = require('axios');
 const MessageFormat = require('messageformat');
+const mfparser = require('messageformat-parser');
 const qs = require('querystring');
 const recurse = require('recursive-readdir');
 const util = require('util');
@@ -38,8 +39,29 @@ const cmdLoadTranslations = (lang) => {
         })
         .then(data => {
             const mf = new MessageFormat(lang);
-            const argExp = /\{\s*[a-zA-Z0-9]*\s*\}/g;
-            const parseArgs = s => (s.match(argExp) || []).map(a => a.slice(1, -1).trim());
+            const traverseArgs = (parsed, args = []) => {
+                if (parsed instanceof Array) {
+                    parsed.forEach(o => traverseArgs(o, args));
+                }
+                else if (typeof parsed != 'string') {
+                    if (parsed.type == 'argument') {
+                        if (args.indexOf(parsed.arg) < 0) {
+                            args.push(parsed.arg);
+                        }
+                    }
+                    else {
+                        Object.values(parsed).forEach(o => {
+                            traverseArgs(o, args);
+                        });
+                    }
+                }
+
+                return args;
+            };
+            const parseArgs = s => {
+                const parsed = mfparser.parse(s);
+                return traverseArgs(parsed);
+            };
 
             data.result.terms.forEach(term => {
                 if (localTerms.en.hasOwnProperty(term.term)) {
