@@ -28,6 +28,7 @@ const cmdLoadTranslations = (lang) => {
         invalid: [],
         unchanged: [],
         updated: [],
+        warnings: [],
     };
 
     loadMessages(LOCALE_PATH, '')
@@ -88,7 +89,7 @@ const cmdLoadTranslations = (lang) => {
                         const transArgs = parseArgs(translation);
 
                         if (enArgs.length != transArgs.length) {
-                            stats.invalid.push(term.term);
+                            stats.warnings.push({ id: term.term, reason: 'argCountMismatch' });
                         }
 
                         for (const arg of transArgs) {
@@ -157,6 +158,8 @@ const cmdLoadTranslations = (lang) => {
             console.log('Ignored: ' + stats.ignored.length);
             console.log('Unchanged: ' + stats.unchanged.length);
             console.log('Updated: ' + stats.updated.length);
+            console.log('Warnings: ' + stats.warnings.length);
+            stats.warnings.forEach(warning => console.log(`- ${warning.reason}: ${warning.id}`));
         })
         .catch(err => {
             console.log('Bailed due to an error');
